@@ -33,6 +33,8 @@ xcb_screen_t* convertRelativeDims(xcb_connection_t* dis) {
         if((&width)[i] < 0)
             (&x)[i] += (&ref.x)[i] + (&ref.width)[i] - ((&width)[i]*=-1);
     }
+    if(width == 0)
+        width = ref.width;
     return screen;
 }
 
@@ -44,7 +46,7 @@ void createWindowAndGraphicsContext(xcb_connection_t* dis, xcb_screen_t* screen,
     *win = xcb_generate_id(dis);
     uint32_t values [] = { 1, EVENT_MASKS};
 
-    xcb_create_window(dis, XCB_COPY_FROM_PARENT, *win, screen->root, x, y, width, height, 0, XCB_WINDOW_CLASS_INPUT_OUTPUT, screen->root_visual, XCB_CW_OVERRIDE_REDIRECT | XCB_CW_EVENT_MASK, &values);
+    xcb_create_window(dis, XCB_COPY_FROM_PARENT, *win, screen->root, x, y, width, height ? height : 1, 0, XCB_WINDOW_CLASS_INPUT_OUTPUT, screen->root_visual, XCB_CW_OVERRIDE_REDIRECT | XCB_CW_EVENT_MASK, &values);
 }
 
 int main(int argc, char *argv[]) {
@@ -64,8 +66,6 @@ int main(int argc, char *argv[]) {
     }
 #endif
 
-    xcb_map_window(dis, win);
-
     dt_context *ctx;
     dt_font *fnt;
     dt_init(&ctx, dis, win);
@@ -73,8 +73,15 @@ int main(int argc, char *argv[]) {
 
     int num_lines[MAX_ARGS];
     num_lines[0] = word_wrap(lines[0]);
+    int totalLines = num_lines[0];
     for(int i = 1; i < MAX_ARGS && lines[i]; i++)
-        num_lines[i] = word_wrap(lines[i]);
+        totalLines += num_lines[i] = word_wrap(lines[i]);
+    if(height == 0) {
+        height = (get_font_height(fnt) + PADDING) * totalLines;
+        xcb_configure_window(dis, win, XCB_CONFIG_WINDOW_HEIGHT, &height);
+    }
+
+    xcb_map_window(dis, win);
 
     struct sigaction action  = {signalHandler};
     sigaction(SIGALRM, &action, NULL);
