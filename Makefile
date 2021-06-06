@@ -9,6 +9,10 @@ else
 	LDFLAGS += -lxcb-randr
 endif
 
+ifdef NO_MSD_ID
+	CFLAGS += -DNO_MSD_ID
+endif
+
 all: $(BIN)
 
 config.h:

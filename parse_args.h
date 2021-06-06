@@ -13,6 +13,14 @@ static inline char** parseArgs(char **argv) {
             break;
         }
         switch(argv[0][1]) {
+#ifndef NO_MSD_ID
+            case 'r':
+                notify_id = *++argv;
+                break;
+            case 's':
+                seq_num = atoi(*++argv);
+                break;
+#endif
             case 'h':
                 height = atoi(*++argv);
                 break;

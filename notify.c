@@ -13,6 +13,10 @@
 #include "primary_monitor.h"
 #endif
 
+#ifndef NO_MSD_ID
+#include "msg_id.h"
+#endif
+
 void signalHandler(int sig) {
 	exit(sig == SIGALRM ? EXIT_TIMEOUT : EXIT_DISMISS);
 }
@@ -38,11 +42,9 @@ void createWindowAndGraphicsContext(xcb_connection_t* dis, xcb_screen_t* screen,
     xcb_create_gc(dis, *gc, screen->root, XCB_GC_BACKGROUND , &bg_color);
 
     *win = xcb_generate_id(dis);
-    uint32_t values [] = { 1,
-        XCB_EVENT_MASK_BUTTON_PRESS |XCB_EVENT_MASK_BUTTON_RELEASE | XCB_EVENT_MASK_POINTER_MOTION | XCB_EVENT_MASK_EXPOSURE};
+    uint32_t values [] = { 1, EVENT_MASKS};
 
     xcb_create_window(dis, XCB_COPY_FROM_PARENT, *win, screen->root, x, y, width, height, 0, XCB_WINDOW_CLASS_INPUT_OUTPUT, screen->root_visual, XCB_CW_OVERRIDE_REDIRECT | XCB_CW_EVENT_MASK, &values);
-    xcb_map_window(dis, *win);
 }
 
 int main(int argc, char *argv[]) {
@@ -53,6 +55,16 @@ int main(int argc, char *argv[]) {
     xcb_gcontext_t gc;
     xcb_window_t win;
     createWindowAndGraphicsContext(dis, screen, &win, &gc);
+
+#ifndef NO_MSD_ID
+    if(notify_id) {
+        int ret = maybeSyncWithExistingClientWithId(dis, win, notify_id, combine_all_args(lines));
+        if(ret)
+            exit(-ret);
+    }
+#endif
+
+    xcb_map_window(dis, win);
 
     dt_context *ctx;
     dt_font *fnt;
@@ -71,6 +83,11 @@ int main(int argc, char *argv[]) {
     xcb_generic_event_t* event;
     while((event = xcb_wait_for_event(dis))) {
         switch(event->response_type &127) {
+#ifndef NO_MSD_ID
+            case XCB_CLIENT_MESSAGE:
+                handleClientMessage(dis, (xcb_client_message_event_t*)event, &lines);
+                __attribute__ ((fallthrough));
+#endif
             case XCB_EXPOSE:
                 //clear window
                 xcb_poly_fill_rectangle(dis, win, gc, 1, (xcb_rectangle_t[]){{0, 0, width, height}});
