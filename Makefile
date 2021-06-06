@@ -3,6 +3,12 @@ LDFLAGS += -ldtext -lxcb
 PREFIX ?= /usr
 BIN := notify
 
+ifdef NO_XRANDR
+	CFLAGS += -DNO_XRANDR
+else
+	LDFLAGS += -lxcb-randr
+endif
+
 all: $(BIN)
 
 config.h:

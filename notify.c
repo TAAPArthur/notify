@@ -9,6 +9,10 @@
 #include "config.h"
 #include "parse_args.h"
 
+#ifndef NO_XRANDR
+#include "primary_monitor.h"
+#endif
+
 void signalHandler(int sig) {
 	exit(sig == SIGALRM ? EXIT_TIMEOUT : EXIT_DISMISS);
 }
@@ -17,6 +21,9 @@ xcb_screen_t* convertRelativeDims(xcb_connection_t* dis) {
     xcb_screen_iterator_t iter = xcb_setup_roots_iterator (xcb_get_setup (dis));
     xcb_screen_t* screen = iter.data;
     xcb_rectangle_t ref = {0, 0, screen->width_in_pixels, screen->height_in_pixels};
+#ifndef NO_XRANDR
+    set_rect_to_primary_dimensions(dis, screen->root, &ref);
+#endif
     for(int i = 0; i < 2; i++) {
         (&x)[i] += (&ref.x)[i];
         if((&width)[i] < 0)
