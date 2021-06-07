@@ -4,6 +4,8 @@
 #ifdef NO_ARG_PARSE
 static inline char** parseArgs(char **argv) { return argv;}
 #else
+#define GET_ARG_STR argv[0][2] ? *argv +2 :*++argv
+#define GET_ARG atoi(GET_ARG_STR );
 static inline char** parseArgs(char **argv) {
     for(; argv[0]; argv++){
         if(argv[0][0] != '-')
@@ -18,23 +20,23 @@ static inline char** parseArgs(char **argv) {
                 notify_id = *++argv;
                 break;
             case 's':
-                seq_num = atoi(*++argv);
+                seq_num = GET_ARG;
                 break;
 #endif
             case 'h':
-                height = atoi(*++argv);
+                height = GET_ARG;
                 break;
             case 't':
-                timeout = atoi(*++argv);
+                timeout = GET_ARG;
                 break;
             case 'w':
-                width = atoi(*++argv);
+                width = GET_ARG;
                 break;
             case 'x':
-                x = atoi(*++argv);
+                x = GET_ARG;
                 break;
             case 'y':
-                y = atoi(*++argv);
+                y = GET_ARG;
                 break;
         }
     }
