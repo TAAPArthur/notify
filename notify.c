@@ -8,6 +8,7 @@
 
 #include "config.h"
 #include "parse_args.h"
+#include "util.h"
 
 #ifndef NO_XRANDR
 #include "primary_monitor.h"
