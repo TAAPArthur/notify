@@ -18,8 +18,8 @@ all: $(BIN)
 config.h:
 	cp config.def.h config.h
 
-$(BIN): $(BIN).c | config.h
-	$(CC) $^ $(CFLAGS) -o $@ $(LDFLAGS)
+$(BIN): $(BIN).c $(wildcard *.h) config.h
+	$(CC) $< $(CFLAGS) -o $@ $(LDFLAGS)
 
 install: $(BIN)
 	install -m755 -Dt ${DESTDIR}${PREFIX}/bin $(BIN)
