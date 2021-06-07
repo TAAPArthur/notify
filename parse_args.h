@@ -7,6 +7,8 @@ static inline char** parseArgs(char **argv) { return argv;}
 #define GET_ARG_STR argv[0][2] ? *argv +2 :*++argv
 #define GET_ARG atoi(GET_ARG_STR );
 static inline char** parseArgs(char **argv) {
+    if(getenv("NOTIFY_FONT"))
+        FONT = getenv("NOTIFY_FONT");
     for(; argv[0]; argv++){
         if(argv[0][0] != '-')
             break;
