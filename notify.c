@@ -77,10 +77,9 @@ int main(int argc, char *argv[]) {
     dt_load(ctx, &fnt, FONT);
 
     int num_lines[MAX_ARGS];
-    num_lines[0] = word_wrap(lines[0]);
-    int totalLines = num_lines[0];
-    for(int i = 1; i < MAX_ARGS && lines[i]; i++)
-        totalLines += num_lines[i] = word_wrap(lines[i]);
+    int totalLines = 0;
+    for(int i = 0; i < MAX_ARGS && lines[i]; i++)
+        totalLines += num_lines[i] = word_wrap_line(ctx, fnt, lines[i], width);
     if(height == 0) {
         height = (get_font_height(fnt) + PADDING) * totalLines;
         xcb_configure_window(dis, win, XCB_CONFIG_WINDOW_HEIGHT, &height);
