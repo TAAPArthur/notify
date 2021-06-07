@@ -38,15 +38,19 @@ xcb_screen_t* convertRelativeDims(xcb_connection_t* dis) {
     return screen;
 }
 
-void createWindowAndGraphicsContext(xcb_connection_t* dis, xcb_screen_t* screen, xcb_window_t*win, xcb_gcontext_t*gc) {
+xcb_window_t createWindow(xcb_connection_t* dis, xcb_screen_t* screen) {
+    xcb_window_t win = xcb_generate_id(dis);
+    uint32_t values [] = {bg_color, border_color , 1, EVENT_MASKS};
+    xcb_create_window(dis, XCB_COPY_FROM_PARENT, win, screen->root, x, y, width, height ? height : 1, border_size, XCB_WINDOW_CLASS_INPUT_OUTPUT, screen->root_visual, XCB_CW_BACK_PIXEL| XCB_CW_BORDER_PIXEL  | XCB_CW_OVERRIDE_REDIRECT | XCB_CW_EVENT_MASK, &values);
+    return win;
+}
 
-    *gc = xcb_generate_id(dis);
-    xcb_create_gc(dis, *gc, screen->root, XCB_GC_BACKGROUND , &bg_color);
-
-    *win = xcb_generate_id(dis);
-    uint32_t values [] = { 1, EVENT_MASKS};
-
-    xcb_create_window(dis, XCB_COPY_FROM_PARENT, *win, screen->root, x, y, width, height ? height : 1, 0, XCB_WINDOW_CLASS_INPUT_OUTPUT, screen->root_visual, XCB_CW_OVERRIDE_REDIRECT | XCB_CW_EVENT_MASK, &values);
+static inline void redraw(xcb_connection_t* dis, xcb_window_t win, dt_context *ctx, dt_font *fnt, char**lines, int*num_lines) {
+    xcb_clear_area(dis, 0, win, 0 , 0, width, height);
+    int y_offset = y + PADDING ;
+    for(int i = 0; i < MAX_ARGS && lines[i]; i++) {
+        y_offset = dt_draw_all_lines(ctx, fnt, &color.color, x + PADDING, y_offset, PADDING, lines[i], num_lines[i]);
+    }
 }
 
 int main(int argc, char *argv[]) {
@@ -54,9 +58,7 @@ int main(int argc, char *argv[]) {
 
     xcb_connection_t* dis = xcb_connect(NULL, NULL);
     xcb_screen_t* screen = convertRelativeDims(dis);
-    xcb_gcontext_t gc;
-    xcb_window_t win;
-    createWindowAndGraphicsContext(dis, screen, &win, &gc);
+    xcb_window_t win = createWindow(dis, screen);
 
 #ifndef NO_MSD_ID
     if(notify_id) {
@@ -81,6 +83,7 @@ int main(int argc, char *argv[]) {
         xcb_configure_window(dis, win, XCB_CONFIG_WINDOW_HEIGHT, &height);
     }
 
+    redraw(dis, win, ctx, fnt, lines, num_lines);
     xcb_map_window(dis, win);
 
     struct sigaction action  = {signalHandler};
@@ -88,18 +91,11 @@ int main(int argc, char *argv[]) {
     alarm(timeout);
     int xRef, press = 0;
     xcb_generic_event_t* event;
+    xcb_flush(dis);
     while((event = xcb_wait_for_event(dis))) {
         switch(event->response_type &127) {
-#ifndef NO_MSD_ID
-            case XCB_CLIENT_MESSAGE:
-                handleClientMessage(dis, (xcb_client_message_event_t*)event, &lines);
-                __attribute__ ((fallthrough));
-#endif
             case XCB_EXPOSE:
-                //clear window
-                xcb_poly_fill_rectangle(dis, win, gc, 1, (xcb_rectangle_t[]){{0, 0, width, height}});
-                for(int i = 0; i < MAX_ARGS && lines[i]; i++)
-                    dt_draw_all_lines(ctx, fnt, &color.color, PADDING, PADDING, PADDING, lines[i], num_lines[i]);
+                redraw(dis, win, ctx, fnt, lines, num_lines);
                 break;
             case XCB_MOTION_NOTIFY:
                 alarm(timeout);
@@ -117,7 +113,13 @@ int main(int argc, char *argv[]) {
                     exit(EXIT_DISMISS);
                 else if (((xcb_button_release_event_t*)event)->detail == ACTION_BUTTON)
                     exit(EXIT_ACTION);
+#ifndef NO_MSD_ID
+            case XCB_CLIENT_MESSAGE:
+                handleClientMessage(dis, (xcb_client_message_event_t*)event, &lines);
+                redraw(dis, win, ctx, fnt, lines, num_lines);
+#endif
         }
         free(event);
+        xcb_flush(dis);
 	}
 }
