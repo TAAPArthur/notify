@@ -14,6 +14,8 @@
 #define EXIT_DISMISS  2
 #define EXIT_TO_SLOW  3
 #define EXIT_COMBINED 4
+#define EXIT_ERR      5
+#define EXIT_UNKNOWN  6
 #define EXIT_TIMEOUT  255
 
 static uint32_t bg_color = 0x3E3E3E;

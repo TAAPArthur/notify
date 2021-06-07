@@ -57,6 +57,8 @@ int main(int argc, char *argv[]) {
     char** lines = parseArgs(argv+1);
 
     xcb_connection_t* dis = xcb_connect(NULL, NULL);
+    if(!dis)
+        exit(EXIT_ERR);
     xcb_screen_t* screen = convertRelativeDims(dis);
     xcb_window_t win = createWindow(dis, screen);
 
@@ -122,4 +124,5 @@ int main(int argc, char *argv[]) {
         free(event);
         xcb_flush(dis);
 	}
+    exit(EXIT_UNKNOWN);
 }
