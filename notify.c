@@ -30,27 +30,27 @@ xcb_screen_t* convertRelativeDims(xcb_connection_t* dis) {
     set_rect_to_primary_dimensions(dis, screen->root, &ref);
 #endif
     for(int i = 0; i < 2; i++) {
-        (&x)[i] += (&ref.x)[i];
-        if((&width)[i] < 0)
-            (&x)[i] += (&ref.x)[i] + (&ref.width)[i] - ((&width)[i]*=-1);
+        (&X)[i] += (&ref.x)[i];
+        if((&WIDTH)[i] < 0)
+            (&X)[i] += (&ref.x)[i] + (&ref.width)[i] - ((&WIDTH)[i]*=-1);
     }
-    if(width == 0)
-        width = ref.width;
+    if(WIDTH == 0)
+        WIDTH = ref.width;
     return screen;
 }
 
 xcb_window_t createWindow(xcb_connection_t* dis, xcb_screen_t* screen) {
     xcb_window_t win = xcb_generate_id(dis);
-    uint32_t values [] = {bg_color, border_color , 1, EVENT_MASKS};
-    xcb_create_window(dis, XCB_COPY_FROM_PARENT, win, screen->root, x, y, width, height ? height : 1, border_size, XCB_WINDOW_CLASS_INPUT_OUTPUT, screen->root_visual, XCB_CW_BACK_PIXEL| XCB_CW_BORDER_PIXEL  | XCB_CW_OVERRIDE_REDIRECT | XCB_CW_EVENT_MASK, &values);
+    uint32_t values [] = {BG_COLOR, BORDER_COLOR , 1, EVENT_MASKS};
+    xcb_create_window(dis, XCB_COPY_FROM_PARENT, win, screen->root, X, Y, WIDTH, HEIGHT ? HEIGHT : 1, BORDER_SIZE, XCB_WINDOW_CLASS_INPUT_OUTPUT, screen->root_visual, XCB_CW_BACK_PIXEL| XCB_CW_BORDER_PIXEL  | XCB_CW_OVERRIDE_REDIRECT | XCB_CW_EVENT_MASK, &values);
     return win;
 }
 
 static inline void redraw(xcb_connection_t* dis, xcb_window_t win, dt_context *ctx, dt_font *fnt, char**lines, int*num_lines) {
-    xcb_clear_area(dis, 0, win, 0 , 0, width, height);
-    int y_offset = y + PADDING ;
+    xcb_clear_area(dis, 0, win, 0 , 0, WIDTH, HEIGHT);
+    int y_offset = Y + PADDING_Y ;
     for(int i = 0; i < MAX_ARGS && lines[i]; i++) {
-        y_offset = dt_draw_all_lines(ctx, fnt, &color.color, x + PADDING, y_offset, PADDING, lines[i], num_lines[i]);
+        y_offset = dt_draw_all_lines(ctx, fnt, &COLOR.color, X + PADDING_X, y_offset, PADDING_Y, lines[i], num_lines[i]);
     }
 }
 
@@ -64,8 +64,8 @@ int main(int argc, char *argv[]) {
     xcb_window_t win = createWindow(dis, screen);
 
 #ifndef NO_MSD_ID
-    if(notify_id) {
-        int ret = maybeSyncWithExistingClientWithId(dis, win, notify_id, combine_all_args(lines));
+    if(NOTIFY_ID) {
+        int ret = maybeSyncWithExistingClientWithId(dis, win, NOTIFY_ID, combine_all_args(lines));
         if(ret)
             exit(-ret);
     }
@@ -79,10 +79,10 @@ int main(int argc, char *argv[]) {
     int num_lines[MAX_ARGS];
     int totalLines = 0;
     for(int i = 0; i < MAX_ARGS && lines[i]; i++)
-        totalLines += num_lines[i] = word_wrap_line(ctx, fnt, lines[i], width);
-    if(height == 0) {
-        height = (get_font_height(fnt) + PADDING) * totalLines;
-        xcb_configure_window(dis, win, XCB_CONFIG_WINDOW_HEIGHT, &height);
+        totalLines += num_lines[i] = word_wrap_line(ctx, fnt, lines[i], WIDTH);
+    if(HEIGHT == 0) {
+        HEIGHT = (get_font_height(fnt) + PADDING_Y) * totalLines;
+        xcb_configure_window(dis, win, XCB_CONFIG_WINDOW_HEIGHT, &HEIGHT);
     }
 
     redraw(dis, win, ctx, fnt, lines, num_lines);
@@ -90,7 +90,7 @@ int main(int argc, char *argv[]) {
 
     struct sigaction action  = {signalHandler};
     sigaction(SIGALRM, &action, NULL);
-    alarm(timeout);
+    alarm(TIMEOUT);
     int xRef, press = 0;
     xcb_generic_event_t* event;
     xcb_flush(dis);
@@ -100,9 +100,9 @@ int main(int argc, char *argv[]) {
                 redraw(dis, win, ctx, fnt, lines, num_lines);
                 break;
             case XCB_MOTION_NOTIFY:
-                alarm(timeout);
+                alarm(TIMEOUT);
                 if(press)
-                    xcb_configure_window(dis, win, XCB_CONFIG_WINDOW_X, (int[1]) {x + ((xcb_motion_notify_event_t*)event)->root_x - xRef});
+                    xcb_configure_window(dis, win, XCB_CONFIG_WINDOW_X, (int[1]) {X + ((xcb_motion_notify_event_t*)event)->root_x - xRef});
                 break;
             case XCB_BUTTON_PRESS:
                 press = 1;

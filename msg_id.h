@@ -6,8 +6,8 @@
 
 xcb_atom_t notify_id_atom;
 
-static const char* notify_id;
-static int seq_num;
+static const char* NOTIFY_ID;
+static int SEQ_NUM;
 static char all_msg_buffer[4096];
 static const char* _sentienal = NULL;
 static int lastReceivedTimeStamp;
@@ -81,8 +81,8 @@ int maybeSyncWithExistingClientWithId(xcb_connection_t* dis, xcb_window_t win, c
     xcb_generic_event_t* event = xcb_poll_for_event(dis);
     if(event->response_type == XCB_PROPERTY_NOTIFY) {
         time = ((xcb_property_notify_event_t*) event)->time;
-        if(!seq_num)
-            seq_num = ((xcb_property_notify_event_t*) event)->sequence;
+        if(!SEQ_NUM)
+            SEQ_NUM = ((xcb_property_notify_event_t*) event)->sequence;
     }
 
     int alreadySet = 0;
@@ -94,7 +94,7 @@ int maybeSyncWithExistingClientWithId(xcb_connection_t* dis, xcb_window_t win, c
         else if(ownerReply && ownerReply->owner) {
             if(ownerReply->owner == win)
                 break;
-            if(send_data_to_selection_owner(dis, win, ownerReply->owner, notify_id_atom, seq_num)) {
+            if(send_data_to_selection_owner(dis, win, ownerReply->owner, notify_id_atom, SEQ_NUM)) {
                 return -EXIT_COMBINED;
             }
         }

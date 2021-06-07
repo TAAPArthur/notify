@@ -17,26 +17,26 @@ static inline char** parseArgs(char **argv) {
         switch(argv[0][1]) {
 #ifndef NO_MSD_ID
             case 'r':
-                notify_id = *++argv;
+                NOTIFY_ID = *++argv;
                 break;
             case 's':
-                seq_num = GET_ARG;
+                SEQ_NUM = GET_ARG;
                 break;
 #endif
             case 'h':
-                height = GET_ARG;
+                HEIGHT = GET_ARG;
                 break;
             case 't':
-                timeout = GET_ARG;
+                TIMEOUT = GET_ARG;
                 break;
             case 'w':
-                width = GET_ARG;
+                WIDTH = GET_ARG;
                 break;
             case 'x':
-                x = GET_ARG;
+                X = GET_ARG;
                 break;
             case 'y':
-                y = GET_ARG;
+                Y = GET_ARG;
                 break;
         }
     }
