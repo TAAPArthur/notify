@@ -27,6 +27,7 @@ $(BIN): $(BIN).c $(wildcard *.h) config.h
 
 install: $(BIN)
 	install -m755 -Dt ${DESTDIR}${PREFIX}/bin $(BIN)
+	install -m755 -D notify-send.sh ${DESTDIR}${PREFIX}/bin/notify-send
 
 uninstall:
 	rm -f ${DESTDIR}${PREFIX}/bin/$(BIN)
