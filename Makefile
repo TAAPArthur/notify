@@ -13,6 +13,10 @@ ifdef NO_MSD_ID
 	CFLAGS += -DNO_MSD_ID
 endif
 
+ifdef DEBUG
+	CFLAGS += -g -DDEBUG=1
+endif
+
 all: $(BIN)
 
 config.h:

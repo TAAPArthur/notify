@@ -6,6 +6,7 @@
 #include <unistd.h>
 #include <xcb/xcb.h>
 
+#include "debug.h"
 #include "config.h"
 #include "parse_args.h"
 #include "util.h"
@@ -98,6 +99,7 @@ int main(int argc, char *argv[]) {
     xcb_generic_event_t* event;
     xcb_flush(dis);
     while((event = xcb_wait_for_event(dis))) {
+        VERBOSE("Received event of type %d \n", event->response_type);
         switch(event->response_type &127) {
             case XCB_EXPOSE:
                 redraw(dis, win, ctx, fnt, lines, num_lines);

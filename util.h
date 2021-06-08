@@ -13,9 +13,14 @@ static inline xcb_atom_t getAtom(xcb_connection_t* dis, const char* name) {
 static inline int hasError(xcb_connection_t* dis, xcb_void_cookie_t cookie) {
     xcb_generic_error_t* e = xcb_request_check(dis, cookie);
     if(e) {
+        logError(e);
         free(e);
     }
     return e ? 1 : 0;
+}
+
+static inline void logError(xcb_generic_error_t* e) {
+    VERBOSE("Detected error: Resource %d; Major %d; Minor %d Error: %d\n", e->resource_id, e->major_code, e->minor_code, e->error_code);
 }
 #endif
 
