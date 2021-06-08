@@ -115,6 +115,11 @@ int main(int argc, char *argv[]) {
                     exit(EXIT_DISMISS);
                 else if (((xcb_button_release_event_t*)event)->detail == ACTION_BUTTON)
                     exit(EXIT_ACTION);
+                break;
+            case XCB_DESTROY_NOTIFY:
+                if(((xcb_destroy_notify_event_t*)event)->event == win)
+                    exit(EXIT_DISMISS);
+                break;
 #ifndef NO_MSD_ID
             case XCB_CLIENT_MESSAGE:
                 handleClientMessage(dis, (xcb_client_message_event_t*)event, &lines);
