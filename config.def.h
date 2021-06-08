@@ -25,10 +25,10 @@ static union {
     uint32_t value;
 } COLOR = {.value = 0xECECEC};
 
-static uint32_t X = 0;
-static uint32_t Y = 0;
-static uint32_t HEIGHT = 0;
-static uint32_t WIDTH = 450;
+static int32_t X = 0;
+static int32_t Y = 0;
+static int32_t HEIGHT = 0;
+static int32_t WIDTH = 450;
 static uint8_t FIXED_HEIGHT = 0;
 
 static const uint32_t EVENT_MASKS = XCB_EVENT_MASK_BUTTON_PRESS |XCB_EVENT_MASK_BUTTON_RELEASE | XCB_EVENT_MASK_POINTER_MOTION | XCB_EVENT_MASK_EXPOSURE | XCB_EVENT_MASK_PROPERTY_CHANGE | XCB_EVENT_MASK_STRUCTURE_NOTIFY;

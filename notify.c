@@ -37,6 +37,7 @@ xcb_screen_t* convertRelativeDims(xcb_connection_t* dis) {
         if((&WIDTH)[i] == 0 && (FIXED_HEIGHT || i == 0))
             (&WIDTH)[i] = (&ref.width)[i];
     }
+    VERBOSE("DIMS: %d %d %d %d\n", X, Y, WIDTH, HEIGHT);
     return screen;
 }
 
@@ -60,6 +61,7 @@ void resize(xcb_connection_t* dis, xcb_window_t win, dt_font *fnt, int totalLine
         return;
     HEIGHT = (get_font_height(fnt) + PADDING_Y) * totalLines;
     xcb_configure_window(dis, win, XCB_CONFIG_WINDOW_HEIGHT, &HEIGHT);
+    VERBOSE("DIMS: %d %d %d %d\n", X, Y, WIDTH, HEIGHT);
 }
 int main(int argc, char *argv[]) {
     char** lines = parseArgs(argv+1);
