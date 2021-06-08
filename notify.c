@@ -49,9 +49,9 @@ xcb_window_t createWindow(xcb_connection_t* dis, xcb_screen_t* screen) {
 
 static inline void redraw(xcb_connection_t* dis, xcb_window_t win, dt_context *ctx, dt_font *fnt, char**lines, int*num_lines) {
     xcb_clear_area(dis, 0, win, 0 , 0, WIDTH, HEIGHT);
-    int y_offset = Y + PADDING_Y ;
-    for(int i = 0; i < MAX_ARGS && lines[i]; i++) {
-        y_offset = dt_draw_all_lines(ctx, fnt, &COLOR.color, X + PADDING_X, y_offset, PADDING_Y, lines[i], num_lines[i]);
+    int y_offset = 0;
+    for(int i = 0; i < MAX_ARGS && num_lines[i] && lines[i] ; i++) {
+        y_offset = dt_draw_all_lines(ctx, fnt, &COLOR.color, PADDING_X, y_offset, PADDING_Y, lines[i], num_lines[i]);
     }
 }
 
