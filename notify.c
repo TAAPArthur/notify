@@ -34,9 +34,9 @@ xcb_screen_t* convertRelativeDims(xcb_connection_t* dis) {
         (&X)[i] += (&ref.x)[i];
         if((&WIDTH)[i] < 0)
             (&X)[i] += (&ref.x)[i] + (&ref.width)[i] - ((&WIDTH)[i]*=-1);
+        if((&WIDTH)[i] == 0 && (FIXED_HEIGHT || i == 0))
+            (&WIDTH)[i] = (&ref.width)[i];
     }
-    if(WIDTH == 0)
-        WIDTH = ref.width;
     return screen;
 }
 
@@ -56,6 +56,8 @@ static inline void redraw(xcb_connection_t* dis, xcb_window_t win, dt_context *c
 }
 
 void resize(xcb_connection_t* dis, xcb_window_t win, dt_font *fnt, int totalLines) {
+    if(FIXED_HEIGHT)
+        return;
     HEIGHT = (get_font_height(fnt) + PADDING_Y) * totalLines;
     xcb_configure_window(dis, win, XCB_CONFIG_WINDOW_HEIGHT, &HEIGHT);
 }
