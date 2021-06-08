@@ -54,6 +54,10 @@ static inline void redraw(xcb_connection_t* dis, xcb_window_t win, dt_context *c
     }
 }
 
+void resize(xcb_connection_t* dis, xcb_window_t win, dt_font *fnt, int totalLines) {
+    HEIGHT = (get_font_height(fnt) + PADDING_Y) * totalLines;
+    xcb_configure_window(dis, win, XCB_CONFIG_WINDOW_HEIGHT, &HEIGHT);
+}
 int main(int argc, char *argv[]) {
     char** lines = parseArgs(argv+1);
 
@@ -81,8 +85,7 @@ int main(int argc, char *argv[]) {
     for(int i = 0; i < MAX_ARGS && lines[i]; i++)
         totalLines += num_lines[i] = word_wrap_line(ctx, fnt, lines[i], WIDTH);
     if(HEIGHT == 0) {
-        HEIGHT = (get_font_height(fnt) + PADDING_Y) * totalLines;
-        xcb_configure_window(dis, win, XCB_CONFIG_WINDOW_HEIGHT, &HEIGHT);
+        resize(dis, win, fnt, totalLines);
     }
 
     redraw(dis, win, ctx, fnt, lines, num_lines);
@@ -122,8 +125,13 @@ int main(int argc, char *argv[]) {
                 break;
 #ifndef NO_MSD_ID
             case XCB_CLIENT_MESSAGE:
-                handleClientMessage(dis, (xcb_client_message_event_t*)event, &lines);
-                redraw(dis, win, ctx, fnt, lines, num_lines);
+                if(handleClientMessage(dis, (xcb_client_message_event_t*)event, &lines)) {
+                    num_lines[0] = word_wrap_line(ctx, fnt, lines[0], WIDTH);
+                    num_lines[1] = 0;
+                    resize(dis, win, fnt, num_lines[0]);
+                    redraw(dis, win, ctx, fnt, lines, num_lines);
+                }
+                break;
 #endif
         }
         free(event);
