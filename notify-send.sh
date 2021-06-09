@@ -1,4 +1,4 @@
-#!/bin/sh -ex
+#!/bin/sh
 
 NOTIFY_ARGS=$DEFAULT_NOTIFY_ARGS
 while [ "$#" -gt 0 ]; do
@@ -36,9 +36,8 @@ EOF
     esac
     shift 2
 done
-NOTIFY_SEND_PATH=${NOTIFY_SEND_PATH:-~/.config/notify}
+NOTIFY_SEND_DIR=${NOTIFY_SEND_DIR:-${XDG_CONFIG_DIR:-~/.config}/notify}/notify_send.d
 if [ -d "$NOTIFY_SEND_PATH" ]; then
-    cd $NOTIFY_SEND_PATH
     for cmd in "$NOTIFY_SEND_PATH"/*.sh; do
         [ -r $cmd ] && . $cmd
     done
