@@ -59,7 +59,7 @@ static inline void redraw(xcb_connection_t* dis, xcb_window_t win, dt_context *c
 void resize(xcb_connection_t* dis, xcb_window_t win, dt_font *fnt, int totalLines) {
     if(FIXED_HEIGHT)
         return;
-    HEIGHT = (get_font_height(fnt) + PADDING_Y) * totalLines;
+    HEIGHT = (dt_get_font_height(fnt) + PADDING_Y) * totalLines;
     xcb_configure_window(dis, win, XCB_CONFIG_WINDOW_HEIGHT, &HEIGHT);
     VERBOSE("DIMS: %d %d %d %d\n", X, Y, WIDTH, HEIGHT);
 }
@@ -82,13 +82,13 @@ int main(int argc, char *argv[]) {
 
     dt_context *ctx;
     dt_font *fnt;
-    dt_init(&ctx, dis, win);
-    dt_load(ctx, &fnt, FONT);
+    dt_init_context(&ctx, dis, win);
+    dt_load_font(dis, &fnt, FONT);
 
     int num_lines[MAX_ARGS];
     int totalLines = 0;
     for(int i = 0; i < MAX_ARGS && lines[i]; i++)
-        totalLines += num_lines[i] = word_wrap_line(ctx, fnt, lines[i], WIDTH);
+        totalLines += num_lines[i] = dt_word_wrap_line(dis, fnt, lines[i], WIDTH);
     if(HEIGHT == 0) {
         resize(dis, win, fnt, totalLines);
     }
@@ -132,7 +132,7 @@ int main(int argc, char *argv[]) {
 #ifndef NO_MSD_ID
             case XCB_CLIENT_MESSAGE:
                 if(handleClientMessage(dis, (xcb_client_message_event_t*)event, &lines)) {
-                    num_lines[0] = word_wrap_line(ctx, fnt, lines[0], WIDTH);
+                    num_lines[0] = dt_word_wrap_line(dis, fnt, lines[0], WIDTH);
                     num_lines[1] = 0;
                     resize(dis, win, fnt, num_lines[0]);
                     redraw(dis, win, ctx, fnt, lines, num_lines);
