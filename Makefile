@@ -13,6 +13,14 @@ ifdef NO_MSD_ID
 	CFLAGS += -DNO_MSD_ID
 endif
 
+ifdef NO_PARSE_ENV
+	CFLAGS += -DNO_PARSE_ENV
+endif
+
+ifdef NO_PARSE_ARGS
+	CFLAGS += -DNO_PARSE_ARGS
+endif
+
 ifdef DEBUG
 	CFLAGS += -g -DDEBUG=1
 endif

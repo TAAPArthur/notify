@@ -9,6 +9,7 @@
 #include "debug.h"
 #include "config.h"
 #include "parse_args.h"
+#include "parse_env.h"
 #include "util.h"
 
 #ifndef NO_XRANDR
@@ -52,7 +53,7 @@ static inline void redraw(xcb_connection_t* dis, xcb_window_t win, dt_context *c
     xcb_clear_area(dis, 0, win, 0 , 0, WIDTH, HEIGHT);
     int y_offset = 0;
     for(int i = 0; i < MAX_ARGS && num_lines[i] && lines[i] ; i++) {
-        y_offset = dt_draw_all_lines(ctx, fnt, &COLOR.color, PADDING_X, y_offset, PADDING_Y, lines[i], num_lines[i]);
+        y_offset = dt_draw_all_lines(ctx, fnt, (dt_color*)&FG_COLOR, PADDING_X, y_offset, PADDING_Y, lines[i], num_lines[i]);
     }
 }
 
@@ -64,6 +65,9 @@ void resize(xcb_connection_t* dis, xcb_window_t win, dt_font *fnt, int totalLine
     VERBOSE("DIMS: %d %d %d %d\n", X, Y, WIDTH, HEIGHT);
 }
 int main(int argc, char *argv[]) {
+#ifndef NO_PARSE_ENV
+    parseEnv();
+#endif
     char** lines = parseArgs(argv+1);
 
     xcb_connection_t* dis = xcb_connect(NULL, NULL);

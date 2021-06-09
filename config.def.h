@@ -17,13 +17,10 @@
 uint8_t DISMISS_BUTTON = 3;
 uint8_t ACTION_BUTTON = 1;
 
+static uint32_t FG_COLOR = 0xECECEC;
 static uint32_t BG_COLOR = 0x3E3E3E;
 static uint32_t BORDER_COLOR = 0xFF;
 static uint32_t BORDER_SIZE = 1;
-static union {
-    dt_color color;
-    uint32_t value;
-} COLOR = {.value = 0xECECEC};
 
 static int32_t X = 0;
 static int32_t Y = 0;

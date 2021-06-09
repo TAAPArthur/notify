@@ -1,0 +1,23 @@
+#ifndef NOTIFY_PARSE_ENV_H
+#define NOTIFY_PARSE_ENV_H
+
+#define ENV_PREFIX "NOTIFY"
+#define PARSE_ENV(VAR) if(getenv(ENV_PREFIX # VAR)) VAR = atoi(getenv(ENV_PREFIX # VAR))
+static inline void parseEnv() {
+    PARSE_ENV(ACTION_BUTTON);
+    PARSE_ENV(BG_COLOR);
+    PARSE_ENV(BORDER_COLOR);
+    PARSE_ENV(BORDER_SIZE);
+    PARSE_ENV(DISMISS_BUTTON);
+    PARSE_ENV(FG_COLOR);
+    PARSE_ENV(FIXED_HEIGHT);
+    PARSE_ENV(HEIGHT);
+    PARSE_ENV(TIMEOUT);
+    PARSE_ENV(WIDTH);
+    PARSE_ENV(X);
+    PARSE_ENV(Y);
+    if(getenv("NOTIFY_FONT"))
+        FONT = getenv("NOTIFY_FONT");
+}
+#endif
+
