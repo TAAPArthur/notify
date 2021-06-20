@@ -39,8 +39,9 @@ done
 NOTIFY_SEND_DIR=${NOTIFY_SEND_DIR:-${XDG_CONFIG_DIR:-~/.config}/notify}/notify_send.d
 if [ -d "$NOTIFY_SEND_PATH" ]; then
     for cmd in "$NOTIFY_SEND_PATH"/*.sh; do
-        [ -r $cmd ] && . $cmd
+        [ -r "$cmd" ] && . "$cmd"
     done
 else
-    notify $NOTIFY_ARGS "$*"
+    # shellcheck disable=SC2086
+    notify $NOTIFY_ARGS "$@"
 fi
