@@ -16,8 +16,10 @@ static inline void parseEnv() {
     PARSE_ENV(WIDTH);
     PARSE_ENV(X);
     PARSE_ENV(Y);
+
+    PARSE_ENV(FONT_SIZE);
     if(getenv("NOTIFY_FONT"))
-        FONT = getenv("NOTIFY_FONT");
+        FONT_NAME = getenv("NOTIFY_FONT");
 }
 #endif
 

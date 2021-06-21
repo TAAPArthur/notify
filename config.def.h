@@ -32,5 +32,6 @@ static const uint32_t EVENT_MASKS = XCB_EVENT_MASK_BUTTON_PRESS |XCB_EVENT_MASK_
 
 static int TIMEOUT = 5;
 
-const char* FONT = "/usr/share/fonts/TTF/LiberationMono-Regular.ttf:32";
+const char* FONT_NAME = "/usr/share/fonts/TTF/LiberationMono-Regular.ttf";
+int FONT_SIZE = 32;
 #endif
