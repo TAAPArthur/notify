@@ -81,7 +81,7 @@ char* combine_all_args(const char *argv[]) {
 int maybeSyncWithExistingClientWithId(xcb_connection_t* dis, xcb_window_t win, const char* id, const char* combinedArgs) {
     notify_id_atom = getAtom(dis, id );
 
-    xcb_change_property(dis, XCB_PROP_MODE_REPLACE, win, notify_id_atom, XCB_ATOM_STRING, 8, strlen(combinedArgs), combinedArgs);
+    xcb_change_property(dis, XCB_PROP_MODE_REPLACE, win, notify_id_atom, XCB_ATOM_STRING, 8, strlen(combinedArgs) + 1, combinedArgs);
     xcb_timestamp_t time = XCB_CURRENT_TIME;
     xcb_flush(dis);
     xcb_generic_event_t* event = xcb_wait_for_event(dis);

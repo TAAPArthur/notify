@@ -4,7 +4,7 @@
 
 #ifdef DEBUG
 #include <stdio.h>
-#define VERBOSE(X...) printf(X)
+#define VERBOSE(X...) do {printf("%d: ", getpid()); printf(X);}while(0)
 #else
 #define VERBOSE(X...)
 #endif
