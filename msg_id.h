@@ -93,7 +93,7 @@ int maybeSyncWithExistingClientWithId(xcb_connection_t* dis, xcb_window_t win, c
 
     int alreadySet = 0;
     while(1) {
-        VERBOSE("Querying selection; Set %d\n", alreadySet );
+        VERBOSE("Querying selection; Set %d\n", alreadySet);
         xcb_get_selection_owner_reply_t* ownerReply = xcb_get_selection_owner_reply(dis, xcb_get_selection_owner(dis,
                                     notify_id_atom), NULL);
         if(alreadySet && !(ownerReply && ownerReply->owner ==  win))

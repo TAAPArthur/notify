@@ -38,7 +38,6 @@ xcb_screen_t* convertRelativeDims(xcb_connection_t* dis) {
         if((&WIDTH)[i] == 0 && (FIXED_HEIGHT || i == 0))
             (&WIDTH)[i] = (&ref.width)[i];
     }
-    VERBOSE("DIMS: %d %d %d %d\n", X, Y, WIDTH, HEIGHT);
     return screen;
 }
 
@@ -50,6 +49,7 @@ xcb_window_t createWindow(xcb_connection_t* dis, xcb_screen_t* screen) {
 }
 
 static inline void redraw(xcb_connection_t* dis, xcb_window_t win, dt_context *ctx, dt_font *fnt, char**lines, int*num_lines) {
+    VERBOSE("DIMS: %d %d %d %d\n", X, Y, WIDTH, HEIGHT);
     xcb_clear_area(dis, 0, win, 0 , 0, WIDTH, HEIGHT);
     int y_offset = 0;
     for(int i = 0; i < MAX_ARGS && num_lines[i] && lines[i] ; i++) {
@@ -62,7 +62,6 @@ void resize(xcb_connection_t* dis, xcb_window_t win, dt_font *fnt, int totalLine
         return;
     HEIGHT = (dt_get_font_height(fnt) + PADDING_Y) * totalLines;
     xcb_configure_window(dis, win, XCB_CONFIG_WINDOW_HEIGHT, &HEIGHT);
-    VERBOSE("DIMS: %d %d %d %d\n", X, Y, WIDTH, HEIGHT);
 }
 int main(int argc, char *argv[]) {
 #ifndef NO_PARSE_ENV
