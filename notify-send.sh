@@ -1,6 +1,5 @@
 #!/bin/sh
 
-NOTIFY_ARGS=$DEFAULT_NOTIFY_ARGS
 while [ "$#" -gt 0 ]; do
     case "$1" in
         -h)
@@ -36,10 +35,11 @@ EOF
     esac
     shift 2
 done
-NOTIFY_SEND_DIR=${NOTIFY_SEND_DIR:-${XDG_CONFIG_DIR:-~/.config}/notify}/notify_send.d
-if [ -d "$NOTIFY_SEND_PATH" ]; then
-    for cmd in "$NOTIFY_SEND_PATH"/*.sh; do
-        [ -r "$cmd" ] && . "$cmd"
+NOTIFY_SEND_DIR=${NOTIFY_SEND_DIR:-${XDG_CONFIG_DIR:-~/.config}/notify}/notify.d
+if [ -d "$NOTIFY_SEND_DIR" ]; then
+    for cmd in "$NOTIFY_SEND_DIR"/*.sh; do
+        # shellcheck disable=SC2015
+        [ -r "$cmd" ] && . "$cmd" || break
     done
 else
     # shellcheck disable=SC2086
