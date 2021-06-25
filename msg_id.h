@@ -24,7 +24,7 @@ static inline char** getNotificationProperties(xcb_connection_t* dis, xcb_window
     return NULL;
 }
 
-int send_data_to_selection_owner(xcb_connection_t* dis, xcb_window_t win, xcb_window_t owner, xcb_atom_t atom, int ts) {
+int send_data_to_selection_owner(xcb_connection_t* dis, xcb_window_t win, xcb_window_t owner, xcb_atom_t atom, int timeStamp ) {
     int mask = XCB_EVENT_MASK_STRUCTURE_NOTIFY;
     VERBOSE("Adding destroy listener for selection owner\n");
     if(hasError(dis, xcb_change_window_attributes_checked(dis, owner, XCB_CW_EVENT_MASK, &mask)))
@@ -34,7 +34,7 @@ int send_data_to_selection_owner(xcb_connection_t* dis, xcb_window_t win, xcb_wi
         32,
         .window = owner,
         .type = atom,
-        .data.data32 = {win, ts, 0}
+        .data.data32 = {win, SEQ_NUM ? SEQ_NUM : timeStamp , timeStamp}
     };
 
     VERBOSE("Sending client message to selection owner\n");
@@ -42,7 +42,7 @@ int send_data_to_selection_owner(xcb_connection_t* dis, xcb_window_t win, xcb_wi
         return 0;
 
     int xfd = xcb_get_file_descriptor(dis);
-	struct pollfd poll_fd = {xfd, POLLIN, 0};
+    struct pollfd poll_fd = {xfd, POLLIN};
     xcb_flush(dis);
 
     while(poll(&poll_fd, 1, 1000)) {
@@ -59,7 +59,7 @@ int send_data_to_selection_owner(xcb_connection_t* dis, xcb_window_t win, xcb_wi
         else
             free(event);
     }
-    return 0;
+    return 1;
 }
 
 void set_args_as_properties(xcb_connection_t* dis, xcb_window_t win, xcb_atom_t atom, const char* buffer, int len) {
@@ -88,8 +88,6 @@ int maybeSyncWithExistingClientWithId(xcb_connection_t* dis, xcb_window_t win, c
     VERBOSE("Waiting to detect property notify event on %d\n", win);
     if(event->response_type == XCB_PROPERTY_NOTIFY) {
         time = ((xcb_property_notify_event_t*) event)->time;
-        if(!SEQ_NUM)
-            SEQ_NUM = ((xcb_property_notify_event_t*) event)->sequence;
     }
     free(event);
 
@@ -105,7 +103,7 @@ int maybeSyncWithExistingClientWithId(xcb_connection_t* dis, xcb_window_t win, c
             if(ownerReply->owner == win) {
                 break;
             }
-            if(send_data_to_selection_owner(dis, win, ownerReply->owner, notify_id_atom, SEQ_NUM)) {
+            if(send_data_to_selection_owner(dis, win, ownerReply->owner, notify_id_atom, time)) {
                 return -EXIT_COMBINED;
             }
         }
@@ -118,17 +116,18 @@ int maybeSyncWithExistingClientWithId(xcb_connection_t* dis, xcb_window_t win, c
 }
 
 int handleClientMessage(xcb_connection_t* dis, xcb_client_message_event_t* event, char***lines) {
-    static int lastReceivedTimeStamp;
+    static uint32_t lastReceivedTimeStamp;
     if(event->type == notify_id_atom) {
-        VERBOSE("Received message from a different process\n");
         xcb_window_t win = event->data.data32[0];
-        if(lastReceivedTimeStamp > event->data.data32[1]) {
-            VERBOSE("Time stamp is old; ignoring message\n");
-            return 0;
-        }
-        lastReceivedTimeStamp = event->data.data32[1];
+        VERBOSE("Received message from a different process; win: %d\n", win);
         if(win) {
-            *lines = getNotificationProperties(dis, win, event->type);
+            if(lastReceivedTimeStamp > event->data.data32[1]) {
+                VERBOSE("Time stamp is old; ignoring message\n");
+            }
+            else {
+                lastReceivedTimeStamp = event->data.data32[1];
+                *lines = getNotificationProperties(dis, win, event->type);
+            }
             xcb_destroy_window(dis, win);
             return 1;
         }
