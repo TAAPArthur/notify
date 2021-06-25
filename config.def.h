@@ -2,7 +2,7 @@
 #define NOTIFY_CONFIG_H
 
 #define PADDING_X 10
-#define PADDING_Y 10
+#define PADDING_Y 0
 #define THRESHOLD 100
 #define MAX_ARGS 20
 
