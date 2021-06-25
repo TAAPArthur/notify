@@ -83,7 +83,7 @@ int maybeSyncWithExistingClientWithId(xcb_connection_t* dis, xcb_window_t win, c
 
     xcb_change_property(dis, XCB_PROP_MODE_REPLACE, win, notify_id_atom, XCB_ATOM_STRING, 8, strlen(combinedArgs), combinedArgs);
     xcb_timestamp_t time = XCB_CURRENT_TIME;
-
+    xcb_flush(dis);
     xcb_generic_event_t* event = xcb_wait_for_event(dis);
     VERBOSE("Waiting to detect property notify event on %d\n", win);
     if(event->response_type == XCB_PROPERTY_NOTIFY) {
