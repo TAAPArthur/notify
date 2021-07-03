@@ -3,6 +3,7 @@
 
 #define ENV_PREFIX "NOTIFY_"
 #define PARSE_ENV(VAR) if(getenv(ENV_PREFIX # VAR)) VAR = atoi(getenv(ENV_PREFIX # VAR))
+#define PARSE_ENV_STR(VAR) if(getenv(ENV_PREFIX # VAR)) VAR = getenv(ENV_PREFIX # VAR)
 static inline void parseEnv() {
     PARSE_ENV(ACTION_BUTTON);
     PARSE_ENV(BG_COLOR);
@@ -16,10 +17,12 @@ static inline void parseEnv() {
     PARSE_ENV(WIDTH);
     PARSE_ENV(X);
     PARSE_ENV(Y);
+#ifndef NO_MSD_ID
+    PARSE_ENV_STR(MSG_ID);
+#endif
 
     PARSE_ENV(FONT_SIZE);
-    if(getenv("NOTIFY_FONT"))
-        FONT_NAME = getenv("NOTIFY_FONT");
+    PARSE_ENV_STR(FONT_NAME);
 }
 #endif
 

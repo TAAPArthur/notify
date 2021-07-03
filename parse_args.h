@@ -17,7 +17,7 @@ static inline char** parseArgs(char **argv) {
         switch(argv[0][1]) {
 #ifndef NO_MSD_ID
             case 'r':
-                NOTIFY_ID = *++argv;
+                MSG_ID = *++argv;
                 break;
             case 's':
                 SEQ_NUM = GET_ARG;

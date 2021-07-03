@@ -76,8 +76,8 @@ int main(int argc, char *argv[]) {
     xcb_window_t win = createWindow(dis, screen);
 
 #ifndef NO_MSD_ID
-    if(NOTIFY_ID) {
-        int ret = maybeSyncWithExistingClientWithId(dis, win, NOTIFY_ID, combine_all_args(lines));
+    if(MSG_ID) {
+        int ret = maybeSyncWithExistingClientWithId(dis, win, MSG_ID, combine_all_args(lines));
         if(ret)
             exit(-ret);
     }

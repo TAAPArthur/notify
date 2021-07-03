@@ -6,7 +6,7 @@
 
 xcb_atom_t notify_id_atom;
 
-static const char* NOTIFY_ID;
+static const char* MSG_ID;
 static int SEQ_NUM;
 
 static char all_msg_buffer[4096];
