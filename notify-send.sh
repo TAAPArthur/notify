@@ -2,32 +2,33 @@
 
 while [ "$#" -gt 0 ]; do
     case "$1" in
+        --)
+            shift
+            break
+            ;;
+        -a)
+            export NOTIFY_APPNAME=$2
+            ;;
+        -c)
+            export NOTIFY_CATEGORY=$2
+            ;;
         -h)
-            export HINT=$2
+            export NOTIFY_HINT=$2
             IFS=: read -r _ label value <<EOF
 $2
 EOF
             if [ "$label" = "x-canonical-private-synchronous" ]; then
-                export NOTIFICATION_ID="$value"
-                NOTIFY_ARGS="$NOTIFY_ARGS -r $value"
+                export NOTIFY_MSG_ID="$value"
             fi
             ;;
         -r)
-            export NOTIFICATION_ID="$2"
-            NOTIFY_ARGS="$NOTIFY_ARGS -r $2"
-            ;;
-        -a)
-            export APPNAME=$2
+            export NOTIFY_MSG_ID="$2"
             ;;
         -t)
-            export TIMEOUT=$2
-            NOTIFY_ARGS="$NOTIFY_ARGS -t $2"
+            export NOTIFY_TIMEOUT=$2
             ;;
         -u)
-            export URGENCY=$2
-            ;;
-        -c)
-            export CATEGORY=$2
+            export NOTIFY_URGENCY=$2
             ;;
         *)
             break
@@ -42,6 +43,5 @@ if [ -d "$NOTIFY_SEND_DIR" ]; then
         [ -r "$cmd" ] && . "$cmd" || break
     done
 else
-    # shellcheck disable=SC2086
-    notify $NOTIFY_ARGS "$@"
+    notify "$@"
 fi
