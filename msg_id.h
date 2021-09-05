@@ -1,7 +1,13 @@
 #ifndef NOTIFY_MSG_H
 #define NOTIFY_MSG_H
 
+#include <assert.h>
+#include <poll.h>
+#include <string.h>
 #include <xcb/xcb_ewmh.h>
+
+#include "config.h"
+#include "util.h"
 #define MIN(A,B) (A<B?A:B)
 
 xcb_atom_t notify_id_atom;

@@ -1,27 +1,20 @@
 #include <dtext/dtext.h>
-#include <poll.h>
 #include <signal.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 #include <xcb/xcb.h>
 
-#include "debug.h"
 #include "config.h"
+#include "debug.h"
+#include "msg_id.h"
 #include "parse_args.h"
 #include "parse_env.h"
+#include "primary_monitor.h"
 #include "util.h"
 
-#ifndef NO_XRANDR
-#include "primary_monitor.h"
-#endif
-
-#ifndef NO_MSD_ID
-#include "msg_id.h"
-#endif
-
 void signalHandler(int sig) {
-	exit(sig == SIGALRM ? EXIT_TIMEOUT : EXIT_DISMISS);
+    exit(sig == SIGALRM ? EXIT_TIMEOUT : EXIT_DISMISS);
 }
 
 xcb_screen_t* convertRelativeDims(xcb_connection_t* dis) {
@@ -146,6 +139,6 @@ int main(int argc, char *argv[]) {
         }
         free(event);
         xcb_flush(dis);
-	}
+    }
     exit(EXIT_UNKNOWN);
 }

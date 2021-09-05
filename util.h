@@ -1,6 +1,8 @@
 #ifndef NOTIFY_UTIL_H
 #define NOTIFY_UTIL_H
 
+#include <xcb/xproto.h>
+#include "debug.h"
 static inline xcb_atom_t getAtom(xcb_connection_t* dis, const char* name) {
     if(!name)return XCB_ATOM_NONE;
     xcb_intern_atom_reply_t* reply;
