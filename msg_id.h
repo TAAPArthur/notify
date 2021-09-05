@@ -102,14 +102,16 @@ int maybeSyncWithExistingClientWithId(xcb_connection_t* dis, xcb_window_t win, c
         VERBOSE("Querying selection; Set %d\n", alreadySet);
         xcb_get_selection_owner_reply_t* ownerReply = xcb_get_selection_owner_reply(dis, xcb_get_selection_owner(dis,
                                     notify_id_atom), NULL);
-        if(alreadySet && !(ownerReply && ownerReply->owner ==  win))
+        xcb_window_t owner = ownerReply ? ownerReply->owner: 0 ;
+        free(ownerReply);
+        if(alreadySet && owner !=  win)
             return -EXIT_TO_SLOW;
-        else if(ownerReply && ownerReply->owner) {
-            VERBOSE("Selection has owner %d\n", ownerReply->owner);
-            if(ownerReply->owner == win) {
+        if(owner) {
+            VERBOSE("Selection has owner %d\n", owner);
+            if(owner == win) {
                 break;
             }
-            if(send_data_to_selection_owner(dis, win, ownerReply->owner, notify_id_atom, time)) {
+            if(send_data_to_selection_owner(dis, win, owner, notify_id_atom, time)) {
                 return -EXIT_COMBINED;
             }
         }
