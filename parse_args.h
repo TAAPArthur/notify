@@ -26,6 +26,11 @@ static inline char** parseArgs(char **argv) {
             case 'h':
                 HEIGHT = GET_ARG;
                 break;
+#ifndef DISALLOW_OVERLAP
+            case 'l':
+                LOCK_FILE = *++argv;
+                break;
+#endif
             case 't':
                 TIMEOUT = GET_ARG;
                 break;

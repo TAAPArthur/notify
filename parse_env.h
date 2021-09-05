@@ -20,6 +20,9 @@ static inline void parseEnv() {
 #ifndef NO_MSD_ID
     PARSE_ENV_STR(MSG_ID);
 #endif
+#ifndef DISALLOW_OVERLAP
+    PARSE_ENV_STR(LOCK_FILE);
+#endif
 
     PARSE_ENV(FONT_SIZE);
     PARSE_ENV_STR(FONT_NAME);

@@ -8,6 +8,7 @@
 #include "config.h"
 #include "debug.h"
 #include "msg_id.h"
+#include "no_overlap.h"
 #include "parse_args.h"
 #include "parse_env.h"
 #include "primary_monitor.h"
@@ -17,20 +18,22 @@ void signalHandler(int sig) {
     exit(sig == SIGALRM ? EXIT_TIMEOUT : EXIT_DISMISS);
 }
 
+static xcb_rectangle_t monitor_dims;
 xcb_screen_t* convertRelativeDims(xcb_connection_t* dis) {
     xcb_screen_iterator_t iter = xcb_setup_roots_iterator (xcb_get_setup (dis));
     xcb_screen_t* screen = iter.data;
-    xcb_rectangle_t ref = {0, 0, screen->width_in_pixels, screen->height_in_pixels};
+    monitor_dims = (xcb_rectangle_t){0, 0, screen->width_in_pixels, screen->height_in_pixels};
 #ifndef NO_XRANDR
-    set_rect_to_primary_dimensions(dis, screen->root, &ref);
+    set_rect_to_primary_dimensions(dis, screen->root, &monitor_dims );
 #endif
     for(int i = 0; i < 2; i++) {
-        (&X)[i] += (&ref.x)[i];
+        (&X)[i] += (&monitor_dims.x)[i];
         if((&WIDTH)[i] < 0)
-            (&X)[i] += (&ref.x)[i] + (&ref.width)[i] - ((&WIDTH)[i]*=-1);
+            (&X)[i] += (&monitor_dims.x)[i] + (&monitor_dims.width)[i] - ((&WIDTH)[i]*=-1);
         if((&WIDTH)[i] == 0 && (FIXED_HEIGHT || i == 0))
-            (&WIDTH)[i] = (&ref.width)[i];
+            (&WIDTH)[i] = (&monitor_dims.width)[i];
     }
+    VERBOSE("Monitor dims %d %d %d %d\n", monitor_dims.x, monitor_dims.y, monitor_dims.width, monitor_dims.height);
     return screen;
 }
 
@@ -85,11 +88,21 @@ int main(int argc, char *argv[]) {
     int totalLines = 0;
     for(int i = 0; i < MAX_ARGS && lines[i]; i++)
         totalLines += num_lines[i] = dt_word_wrap_line(dis, fnt, lines[i], WIDTH);
+
+    VERBOSE("Detected %d initial lines\n", totalLines);
     if(HEIGHT == 0) {
         resize(dis, win, fnt, totalLines);
     }
+    VERBOSE("Initial Size %d %d %d %d\n", X,Y,WIDTH,HEIGHT);
+
+#ifndef NO_OVERLAP_DETECTION
+    if(adjust_position(dis, win, &monitor_dims)) {
+        xcb_configure_window(dis, win, XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y, (int[2]) {X,Y });
+    }
+#endif
 
     redraw(dis, win, ctx, fnt, lines, num_lines);
+    VERBOSE("Mapping window\n");
     xcb_map_window(dis, win);
 
     struct sigaction action  = {signalHandler};
