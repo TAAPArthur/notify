@@ -87,7 +87,7 @@ int main(int argc, char *argv[]) {
     int num_lines[MAX_ARGS];
     int totalLines = 0;
     for(int i = 0; i < MAX_ARGS && lines[i]; i++)
-        totalLines += num_lines[i] = dt_word_wrap_line(dis, fnt, lines[i], WIDTH);
+        totalLines += num_lines[i] = dt_word_wrap_line(dis, fnt, lines[i], WIDTH - PADDING_X * 2);
 
     VERBOSE("Detected %d initial lines\n", totalLines);
     if(HEIGHT == 0) {
@@ -142,7 +142,7 @@ int main(int argc, char *argv[]) {
             case XCB_CLIENT_MESSAGE:
                 if(handleClientMessage(dis, (xcb_client_message_event_t*)event, &lines)) {
                     alarm(TIMEOUT);
-                    num_lines[0] = dt_word_wrap_line(dis, fnt, lines[0], WIDTH);
+                    num_lines[0] = dt_word_wrap_line(dis, fnt, lines[0], WIDTH - PADDING_X*2);
                     num_lines[1] = 0;
                     resize(dis, win, fnt, num_lines[0]);
                     redraw(dis, win, ctx, fnt, lines, num_lines);
