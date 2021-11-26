@@ -29,7 +29,7 @@ xcb_screen_t* convertRelativeDims(xcb_connection_t* dis) {
     for(int i = 0; i < 2; i++) {
         (&X)[i] += (&monitor_dims.x)[i];
         if((&WIDTH)[i] < 0)
-            (&X)[i] += (&monitor_dims.x)[i] + (&monitor_dims.width)[i] - ((&WIDTH)[i]*=-1);
+            (&X)[i] += (&monitor_dims.x)[i] + (&monitor_dims.width)[i] - ((&WIDTH)[i]*=-1) - BORDER_SIZE*2;
         if((&WIDTH)[i] == 0 && (FIXED_HEIGHT || i == 0))
             (&WIDTH)[i] = (&monitor_dims.width)[i];
     }
