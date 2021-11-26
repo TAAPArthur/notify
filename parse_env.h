@@ -2,7 +2,7 @@
 #define NOTIFY_PARSE_ENV_H
 
 #define ENV_PREFIX "NOTIFY_"
-#define PARSE_ENV(VAR) if(getenv(ENV_PREFIX # VAR)) VAR = atoi(getenv(ENV_PREFIX # VAR))
+#define PARSE_ENV(VAR) if(getenv(ENV_PREFIX # VAR)) VAR = strtol(getenv(ENV_PREFIX # VAR), NULL, 0)
 #define PARSE_ENV_STR(VAR) if(getenv(ENV_PREFIX # VAR)) VAR = getenv(ENV_PREFIX # VAR)
 static inline void parseEnv() {
     PARSE_ENV(ACTION_BUTTON);
