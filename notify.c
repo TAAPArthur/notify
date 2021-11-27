@@ -82,7 +82,8 @@ int main(int argc, char *argv[]) {
     dt_context *ctx;
     dt_font *fnt;
     dt_init_context(&ctx, dis, win);
-    dt_load_font(dis, &fnt, FONT_NAME, FONT_SIZE);
+    if(dt_load_font(dis, &fnt, FONT_NAME, FONT_SIZE))
+        exit(EXIT_FONT);
 
     int num_lines[MAX_ARGS];
     int totalLines = 0;

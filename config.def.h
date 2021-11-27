@@ -15,6 +15,7 @@
 #define EXIT_COMBINED 4
 #define EXIT_ERR      5
 #define EXIT_UNKNOWN  6
+#define EXIT_FONT     20
 #define EXIT_TIMEOUT  255
 
 uint8_t DISMISS_BUTTON = 3;
