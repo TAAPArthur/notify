@@ -4,9 +4,9 @@
 
 #ifdef DEBUG
 #include <stdio.h>
-#define VERBOSE(X...) do {printf("%d: ", getpid()); printf(X);}while(0)
+#define VERBOSE(...) do {printf("%d: ", getpid()); printf(__VA_ARGS__);}while(0)
 #else
-#define VERBOSE(X...)
+#define VERBOSE(...)
 #endif
 #endif
 

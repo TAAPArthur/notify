@@ -72,7 +72,7 @@ void set_args_as_properties(xcb_connection_t* dis, xcb_window_t win, xcb_atom_t 
     xcb_change_property(dis, XCB_PROP_MODE_REPLACE, win, atom, XCB_ATOM_STRING, 8, len, buffer);
 }
 
-char* combine_all_args(const char *argv[]) {
+char* combine_all_args(char * const *argv) {
     int rem_size = sizeof(all_msg_buffer) - 2;
     for(int i=0;argv[i]  && rem_size > 0; i++) {
         int part_size = strlen(argv[i]);

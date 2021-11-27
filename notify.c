@@ -106,7 +106,7 @@ int main(int argc, char *argv[]) {
     VERBOSE("Mapping window\n");
     xcb_map_window(dis, win);
 
-    struct sigaction action  = {signalHandler};
+    struct sigaction action  = {.sa_handler = signalHandler};
     sigaction(SIGALRM, &action, NULL);
     alarm(TIMEOUT);
     int xRef, press = 0;

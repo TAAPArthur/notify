@@ -1,7 +1,7 @@
-CFLAGS += -Wall -Wextra -pedantic
-LDFLAGS += -lxcb
-PREFIX ?= /usr
-BIN := notify
+CFLAGS = -Wall
+LDFLAGS = -lxcb
+PREFIX = /usr
+BIN = notify
 
 ifdef NO_XRANDR
 	CFLAGS += -DNO_XRANDR

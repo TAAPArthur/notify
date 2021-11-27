@@ -8,7 +8,7 @@ static inline void set_rect_to_primary_dimensions(xcb_connection_t*dis, xcb_wind
     while(iter.rem) {
         xcb_randr_monitor_info_t* monitorInfo = iter.data;
         if(monitorInfo->primary) {
-            memcpy(rect, &monitorInfo->x, sizeof(rect));
+            memcpy(rect, &monitorInfo->x, sizeof(*rect));
             break;
         }
         xcb_randr_monitor_info_next(&iter);
