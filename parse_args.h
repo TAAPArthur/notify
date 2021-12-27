@@ -10,14 +10,14 @@ static inline char** parseArgs(char **argv) {
     for(; argv[0]; argv++){
         if(argv[0][0] != '-')
             break;
-        if(argv[0][1] == '-') {
+        if(argv[0][1] == '-' && !argv[0][2]) {
             argv++;
             break;
         }
         switch(argv[0][1]) {
 #ifndef NO_MSD_ID
             case 'r':
-                MSG_ID = *++argv;
+                MSG_ID = GET_ARG_STR;
                 break;
             case 's':
                 SEQ_NUM = GET_ARG;
