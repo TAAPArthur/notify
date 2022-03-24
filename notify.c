@@ -119,13 +119,13 @@ int main(int argc, char *argv[]) {
                 redraw(dis, win, ctx, fnt, lines, num_lines);
                 break;
             case XCB_MOTION_NOTIFY:
-                alarm(TIMEOUT);
                 if(press)
                     xcb_configure_window(dis, win, XCB_CONFIG_WINDOW_X, (int[1]) {X + ((xcb_motion_notify_event_t*)event)->root_x - xRef});
                 break;
             case XCB_BUTTON_PRESS:
                 press = 1;
                 xRef = ((xcb_button_press_event_t*)event)->root_x;
+                alarm(0);
                 break;
             case XCB_BUTTON_RELEASE:
                 if(abs(((xcb_button_release_event_t*)event)->root_x - xRef) > THRESHOLD)
@@ -134,6 +134,7 @@ int main(int argc, char *argv[]) {
                     exit(EXIT_DISMISS);
                 else if (((xcb_button_release_event_t*)event)->detail == ACTION_BUTTON)
                     exit(EXIT_ACTION);
+                alarm(TIMEOUT);
                 break;
             case XCB_DESTROY_NOTIFY:
                 if(((xcb_destroy_notify_event_t*)event)->event == win)
