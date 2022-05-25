@@ -15,6 +15,8 @@
 #include "primary_monitor.h"
 #include "util.h"
 
+static char lines[LINE_BUFFER_SIZE];
+
 void signalHandler(int sig) {
     exit(sig == SIGALRM ? EXIT_TIMEOUT : EXIT_DISMISS);
 }
@@ -45,13 +47,11 @@ xcb_window_t createWindow(xcb_connection_t* dis, xcb_screen_t* screen) {
     return win;
 }
 
-static inline void redraw(xcb_connection_t* dis, xcb_window_t win, dt_context *ctx, dt_font *fnt, char**lines, int*num_lines) {
+static inline void redraw(xcb_connection_t* dis, xcb_window_t win, dt_context *ctx, dt_font *fnt, char* lines, int num_lines) {
     VERBOSE("DIMS: %d %d %d %d\n", X, Y, WIDTH, HEIGHT);
     xcb_clear_area(dis, 0, win, 0 , 0, WIDTH, HEIGHT);
     int y_offset = 0;
-    for (int i = 0; i < MAX_ARGS && num_lines[i] && lines[i] ; i++) {
-        y_offset = dt_draw_all_lines(ctx, fnt, FG_COLOR, PADDING_X, y_offset, PADDING_Y, lines[i], num_lines[i]);
-    }
+    dt_draw_all_lines(ctx, fnt, FG_COLOR, PADDING_X, y_offset, PADDING_Y, lines, num_lines);
 }
 
 void resize(xcb_connection_t* dis, xcb_window_t win, dt_font *fnt, int totalLines) {
@@ -60,11 +60,26 @@ void resize(xcb_connection_t* dis, xcb_window_t win, dt_font *fnt, int totalLine
     HEIGHT = (dt_get_font_height(fnt) + PADDING_Y) * totalLines;
     xcb_configure_window(dis, win, XCB_CONFIG_WINDOW_HEIGHT, &HEIGHT);
 }
+
+int addLines(char* dest, char* const* src) {
+    while(*src) {
+        if(dest + strlen(*src) + 1 >= lines + LINE_BUFFER_SIZE) {
+            return 0;
+        }
+        dest = stpcpy(dest, *src++);
+        if(*src) {
+            *dest = '\n';
+            dest++;
+        }
+    }
+    return 1;
+}
+
 int main(int argc, char *argv[]) {
 #ifndef NO_PARSE_ENV
     parseEnv();
 #endif
-    char** lines = parseArgs(argv+1);
+    addLines(lines, parseArgs(argv+1));
 
     xcb_connection_t* dis = xcb_connect(NULL, NULL);
     if(!dis)
@@ -74,7 +89,7 @@ int main(int argc, char *argv[]) {
 
 #ifndef NO_MSD_ID
     if(MSG_ID) {
-        int ret = maybeSyncWithExistingClientWithId(dis, win, MSG_ID, combine_all_args(lines));
+        int ret = maybeSyncWithExistingClientWithId(dis, win, MSG_ID, lines);
         if(ret)
             exit(-ret);
     }
@@ -85,10 +100,7 @@ int main(int argc, char *argv[]) {
     if (!fnt)
         exit(EXIT_FONT);
 
-    int num_lines[MAX_ARGS];
-    int totalLines = 0;
-    for(int i = 0; i < MAX_ARGS && lines[i]; i++)
-        totalLines += num_lines[i] = dt_word_wrap_line(dis, fnt, lines[i], WIDTH - PADDING_X * 2);
+    int totalLines = dt_word_wrap_line(dis, fnt, lines, WIDTH - PADDING_X * 2);
 
     VERBOSE("Detected %d initial lines\n", totalLines);
     if(HEIGHT == 0) {
@@ -102,7 +114,7 @@ int main(int argc, char *argv[]) {
     }
 #endif
 
-    redraw(dis, win, ctx, fnt, lines, num_lines);
+    redraw(dis, win, ctx, fnt, lines, totalLines);
     VERBOSE("Mapping window\n");
     xcb_map_window(dis, win);
 
@@ -114,9 +126,9 @@ int main(int argc, char *argv[]) {
     xcb_flush(dis);
     while((event = xcb_wait_for_event(dis))) {
         VERBOSE("Received event of type %d \n", event->response_type);
-        switch(event->response_type &127) {
+        switch(event->response_type & 127) {
             case XCB_EXPOSE:
-                redraw(dis, win, ctx, fnt, lines, num_lines);
+                redraw(dis, win, ctx, fnt, lines, totalLines);
                 break;
             case XCB_MOTION_NOTIFY:
                 if(press)
@@ -142,12 +154,11 @@ int main(int argc, char *argv[]) {
                 break;
 #ifndef NO_MSD_ID
             case XCB_CLIENT_MESSAGE:
-                if(handleClientMessage(dis, (xcb_client_message_event_t*)event, &lines)) {
+                if(handleClientMessage(dis, (xcb_client_message_event_t*)event, lines, totalLines)) {
                     alarm(TIMEOUT);
-                    num_lines[0] = dt_word_wrap_line(dis, fnt, lines[0], WIDTH - PADDING_X*2);
-                    num_lines[1] = 0;
-                    resize(dis, win, fnt, num_lines[0]);
-                    redraw(dis, win, ctx, fnt, lines, num_lines);
+                    totalLines = dt_word_wrap_line(dis, fnt, lines, WIDTH - PADDING_X * 2);
+                    resize(dis, win, fnt, totalLines);
+                    redraw(dis, win, ctx, fnt, lines, totalLines);
                 }
                 break;
 #endif

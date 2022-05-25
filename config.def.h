@@ -18,6 +18,8 @@
 #define EXIT_FONT     20
 #define EXIT_TIMEOUT  255
 
+#define LINE_BUFFER_SIZE 4096
+
 uint8_t DISMISS_BUTTON = 3;
 uint8_t ACTION_BUTTON = 1;
 

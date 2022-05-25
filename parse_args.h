@@ -16,6 +16,8 @@ static inline char** parseArgs(char **argv) {
         }
         switch(argv[0][1]) {
 #ifndef NO_MSD_ID
+            case 'R':
+                APPEND_MSG = 1;
             case 'r':
                 MSG_ID = GET_ARG_STR;
                 break;

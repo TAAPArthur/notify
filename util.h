@@ -26,5 +26,12 @@ static inline int hasError(xcb_connection_t* dis, xcb_void_cookie_t cookie) {
     }
     return e ? 1 : 0;
 }
-#endif
 
+static inline void join_lines(char* lines, int num_lines) {
+    for(int i = 0; i < num_lines - 1; i++) {
+        lines[strlen(lines)] = '\n';
+    }
+}
+
+int addLines(char* dest, char* const * src);
+#endif

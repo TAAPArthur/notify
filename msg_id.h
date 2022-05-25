@@ -14,20 +14,19 @@ xcb_atom_t notify_id_atom;
 
 static const char* MSG_ID;
 static int SEQ_NUM;
+static int APPEND_MSG;
 
-static char all_msg_buffer[4096];
-static char* all_msg_ptr = all_msg_buffer;
-
-static inline char** getNotificationProperties(xcb_connection_t* dis, xcb_window_t win, xcb_atom_t atom) {
+static inline void getNotificationProperties(xcb_connection_t* dis, xcb_window_t win, xcb_atom_t atom, char* dest) {
+    static char buffer[LINE_BUFFER_SIZE];
+    char* ptr[] = {buffer, NULL};
     xcb_get_property_reply_t* reply;
     xcb_get_property_cookie_t cookie = xcb_get_property(dis, 0, win, atom, XCB_ATOM_STRING, 0, -1);
     if((reply = xcb_get_property_reply(dis, cookie, NULL))) {
         int len = xcb_get_property_value_length(reply);
-        strncpy(all_msg_buffer, xcb_get_property_value(reply), MIN(len, sizeof(all_msg_buffer) - 1));
+        strncpy(buffer, xcb_get_property_value(reply), MIN(len, LINE_BUFFER_SIZE - 1));
+        addLines(dest, ptr);
         free(reply);
-        return &all_msg_ptr;
     }
-    return NULL;
 }
 
 int send_data_to_selection_owner(xcb_connection_t* dis, xcb_window_t win, xcb_window_t owner, xcb_atom_t atom, int timeStamp ) {
@@ -40,7 +39,7 @@ int send_data_to_selection_owner(xcb_connection_t* dis, xcb_window_t win, xcb_wi
         32,
         .window = owner,
         .type = atom,
-        .data.data32 = {win, SEQ_NUM ? SEQ_NUM : timeStamp , timeStamp}
+        .data.data32 = {win, SEQ_NUM ? SEQ_NUM : timeStamp, timeStamp, APPEND_MSG, 0}
     };
 
     VERBOSE("Sending client message to selection owner\n");
@@ -68,26 +67,12 @@ int send_data_to_selection_owner(xcb_connection_t* dis, xcb_window_t win, xcb_wi
     return 1;
 }
 
-void set_args_as_properties(xcb_connection_t* dis, xcb_window_t win, xcb_atom_t atom, const char* buffer, int len) {
-    xcb_change_property(dis, XCB_PROP_MODE_REPLACE, win, atom, XCB_ATOM_STRING, 8, len, buffer);
-}
-
-char* combine_all_args(char * const *argv) {
-    int rem_size = sizeof(all_msg_buffer) - 2;
-    for(int i=0;argv[i]  && rem_size > 0; i++) {
-        int part_size = strlen(argv[i]);
-        strncat(all_msg_buffer, argv[i], rem_size );
-        if(argv[i+1])
-            strcat(all_msg_buffer, "\n");
-        rem_size -= part_size + 1;
-    }
-    return all_msg_buffer;
-}
-
-int maybeSyncWithExistingClientWithId(xcb_connection_t* dis, xcb_window_t win, const char* id, const char* combinedArgs) {
+int maybeSyncWithExistingClientWithId(xcb_connection_t* dis, xcb_window_t win, const char* id, const char* lines) {
     notify_id_atom = getAtom(dis, id );
 
-    xcb_change_property(dis, XCB_PROP_MODE_REPLACE, win, notify_id_atom, XCB_ATOM_STRING, 8, strlen(combinedArgs) + 1, combinedArgs);
+    const char* start_of_second_line = APPEND_MSG ? strchr(lines, '\n') : NULL;
+    const char * lines_to_send = start_of_second_line ? start_of_second_line : lines;
+    xcb_change_property(dis, XCB_PROP_MODE_REPLACE, win, notify_id_atom, XCB_ATOM_STRING, 8, strlen(lines_to_send) + 1, lines_to_send);
     xcb_timestamp_t time = XCB_CURRENT_TIME;
     xcb_flush(dis);
     xcb_generic_event_t* event = xcb_wait_for_event(dis);
@@ -123,18 +108,24 @@ int maybeSyncWithExistingClientWithId(xcb_connection_t* dis, xcb_window_t win, c
     return 0;
 }
 
-int handleClientMessage(xcb_connection_t* dis, xcb_client_message_event_t* event, char***lines) {
+int handleClientMessage(xcb_connection_t* dis, xcb_client_message_event_t* event, char* lines, int num_lines) {
     static uint32_t lastReceivedTimeStamp;
     if(event->type == notify_id_atom) {
         xcb_window_t win = event->data.data32[0];
-        VERBOSE("Received message from a different process; win: %d\n", win);
-        if(win) {
+        int append = event->data.data32[3];
+        VERBOSE("Received message from a different process; win: %d; append %d\n", win, append);
+        if (win) {
             if(lastReceivedTimeStamp > event->data.data32[1]) {
                 VERBOSE("Time stamp is old; ignoring message\n");
             }
             else {
                 lastReceivedTimeStamp = event->data.data32[1];
-                *lines = getNotificationProperties(dis, win, event->type);
+                char * dest = lines;
+                if (append) {
+                    join_lines(lines, num_lines);
+                    dest = lines + strlen(lines);
+                }
+                getNotificationProperties(dis, win, event->type, dest);
             }
             xcb_destroy_window(dis, win);
             return 1;
