@@ -1,5 +1,5 @@
 CFLAGS += -Wall -Wextra -pedantic
-LDFLAGS += -ldtext -lxcb
+LDFLAGS += -lxcb
 PREFIX ?= /usr
 BIN := notify
 
@@ -28,6 +28,11 @@ endif
 ifdef DEBUG
 	CFLAGS += -g -DDEBUG=1
 endif
+
+
+# Dtext flags
+CFLAGS += -I /usr/include/freetype2
+LDFLAGS += -lxcb-render -lxcb-render-util -lfreetype
 
 all: $(BIN)
 

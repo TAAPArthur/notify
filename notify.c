@@ -1,4 +1,5 @@
-#include <dtext/dtext.h>
+#define DTEXT_XCB_IMPLEMENTATION
+#include "dtext_xcb.h"
 #include <signal.h>
 #include <stdlib.h>
 #include <string.h>
@@ -79,10 +80,9 @@ int main(int argc, char *argv[]) {
     }
 #endif
 
-    dt_context *ctx;
-    dt_font *fnt;
-    dt_init_context(&ctx, dis, win);
-    if(dt_load_font(dis, &fnt, FONT_NAME, FONT_SIZE))
+    dt_context *ctx = dt_create_context(dis, win);
+    dt_font *fnt = dt_load_font(dis, FONT_NAME, FONT_SIZE);
+    if (!fnt)
         exit(EXIT_FONT);
 
     int num_lines[MAX_ARGS];
