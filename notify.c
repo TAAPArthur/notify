@@ -49,8 +49,8 @@ static inline void redraw(xcb_connection_t* dis, xcb_window_t win, dt_context *c
     VERBOSE("DIMS: %d %d %d %d\n", X, Y, WIDTH, HEIGHT);
     xcb_clear_area(dis, 0, win, 0 , 0, WIDTH, HEIGHT);
     int y_offset = 0;
-    for(int i = 0; i < MAX_ARGS && num_lines[i] && lines[i] ; i++) {
-        y_offset = dt_draw_all_lines(ctx, fnt, (dt_color*)&FG_COLOR, PADDING_X, y_offset, PADDING_Y, lines[i], num_lines[i]);
+    for (int i = 0; i < MAX_ARGS && num_lines[i] && lines[i] ; i++) {
+        y_offset = dt_draw_all_lines(ctx, fnt, FG_COLOR, PADDING_X, y_offset, PADDING_Y, lines[i], num_lines[i]);
     }
 }
 
