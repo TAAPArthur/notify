@@ -10,7 +10,7 @@ make install
 ## Features
 * No daemon/dbus dependency
 * Core program is about ~100 lines
-* No external dependencies except xcb and [dtext-xcb](https://codeberg.org/TAAPArthur/dtext-xcb) (no Xft)
+* No external dependencies except xcb (no Xft)
 * Can "swipe" to dismiss notifications
 * Auto wraps text to fit within a specified width
 * Extra features can be disabled on build
