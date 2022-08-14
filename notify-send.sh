@@ -43,5 +43,5 @@ if [ -d "$NOTIFY_SEND_DIR" ]; then
         [ -r "$cmd" ] && . "$cmd" || break
     done
 else
-    notify "$@"
+    exec notify "$@"
 fi
